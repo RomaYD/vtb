@@ -33,7 +33,7 @@ def registration():
     session = _factory()
     if not request.json:
         return flask.jsonify({'error': 'Empty request'})
-    url = ''
+    url = 'http://mabaker.pythonanywhere.com/blockchainapi/v1/new_wallet'
     repos = requests.get(url + '/new_wallet').json()
     user = User(role=request.json['role'], name=request.json['name'], login=request.json['login'], password=request.json['password'],
                 surname=request.json['surname'], public_key=repos['publicKey'], private_key=repos['privateKey'], lvl=1)
