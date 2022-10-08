@@ -8,10 +8,6 @@ from sqlalchemy.orm import sessionmaker
 
 import requests
 
-from OpenSSL import SSL
-context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
-context.use_privatekey_file('server.key')
-context.use_certificate_file('server.crt')
 app = Flask(__name__)
 engine = create_engine(f'sqlite:///nodes.sqlite3')
 Base.metadata.bind = engine
@@ -43,7 +39,17 @@ def registration():
                 surname=request.json['surname'], public_key=repos['publicKey'], private_key=repos['privateKey'], lvl=1)
     session.add(user)
     session.commit()
-    print(user.login)
+    return flask.jsonify({'success': 'OK'})
+
+
+@app.route('/v1/delete/<int:uid>', methods=['POST'])
+def delete(uid):
+    session = _factory()
+    if not request.json:
+        return flask.jsonify({'error': 'Empty request'})
+    user_to_delete = session.query(User).filter(User.id == uid).first()
+    session.delete(user_to_delete)
+    session.commit()
     return flask.jsonify({'success': 'OK'})
 
 
@@ -59,6 +65,7 @@ def edit_info(uid):
     user.role = request.json['role']
     user.name = request.json['name']
     user.login = request.json['login']
+    user.avatar_url = request.json['avatar_url']
     user.password = request.json['password']
     user.surname = request.json['surname']
     user.team_id = request.json['team_id']
